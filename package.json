@@ -1,0 +1,26 @@
+{
+  "name": "ts_server_app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node-dev --respawn --transpile-only src/app.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/express-validator": "^2.20.33",
+    "@types/node": "^24.3.0",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "mongoose": "^8.18.1",
+    "rxjs": "^7.8.2",
+    "uuid": "^13.0.0"
+  }
+}
