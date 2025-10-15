@@ -9,8 +9,6 @@ export interface JWTPayload {
 const JWT_SECRET = process.env.JWT_SECRET as string
 const JWT_EXPIRE_IN = process.env.JWT_EXPIRE_IN 
 
-// export const JWTService = () => {
-
 export const generateToken = (payload: JWTPayload): string => {
 
     try {
@@ -27,12 +25,6 @@ export const generateToken = (payload: JWTPayload): string => {
         throw new Error('Error al crear el token')
     }
 };
-
-// return{
-//     generateToken
-// }
-// }
-
 
 export const verifyToken = (token: string): JWTPayload => {
     try {

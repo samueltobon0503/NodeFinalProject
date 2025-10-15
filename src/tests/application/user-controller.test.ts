@@ -1,5 +1,4 @@
 import { createRequest, createResponse } from 'node-mocks-http';
-import { saveUser } from '../../domain/services/user-service';
 import { createUser } from '../../application/controllers/user-controller';
 
 jest.mock('../../domain/services/user-service', () => ({
