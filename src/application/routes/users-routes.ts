@@ -1,9 +1,10 @@
 import express, { Router } from "express";
 import { createUser, getAllUsers, inactiveUser, updateUser } from "../controllers/user-controller";
+import { verifyAuthToken } from "../middlewares/jwt-verification";
 
 const userRouter: Router = express.Router();
 
-userRouter.get('/user', getAllUsers);
+userRouter.get('/user', verifyAuthToken, getAllUsers);
 
 userRouter.post('/user', createUser);
 

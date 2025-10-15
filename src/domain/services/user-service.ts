@@ -6,7 +6,7 @@ export const getUsers = async () => {
         return await User.find();
     } catch (error) {
         console.error(error);
-        throw new Error("Se cagó obteniendo todos");
+        throw new Error("Hubo un error obteniendo los usuarios");
     }
 }
 
@@ -31,7 +31,7 @@ export const updateLUser = async (userId: string, updateData: IUser) => {
         return updatedUser;
     } catch (error) {
         console.error(error);
-        throw new Error("Se cagó obteniendo todos");
+        throw new Error("Hubo un error actualizando el usuario");
     }
 }
 
@@ -45,6 +45,6 @@ export const inactiveLUser = async (userId: string) => {
         return inactiveUser;
     } catch (error) {
         console.error(error);
-        throw new Error("Se cagó obteniendo todos");
+        throw new Error("Hubo un error inactivando el usuario");
     }
 }
