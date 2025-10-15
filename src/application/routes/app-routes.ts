@@ -1,5 +1,4 @@
 import { Request, Response, Router } from "express";
-import todoRouter from "./todos-routes";
 import userRouter from "./users-routes";
 
 
@@ -12,7 +11,6 @@ appRouter.get('/', (req: Request, res: Response) =>{
     });
 });
 
-appRouter.use('/', todoRouter);
 appRouter.use('/', userRouter);
 
 
