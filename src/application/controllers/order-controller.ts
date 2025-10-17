@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import { IOrder } from "../../domain/models/IOrder";
-import { getOrder, inactiveLOrder, saveOrder, updateLOrder } from "../../domain/services/order-services";
+import { getOrder, inactiveLOrder, saveOrder, updateLOrder } from "../../domain/services/order-service";
 
 
 
-export const getAllOrder = async (request : Request, response: Response ) => {
+export const getAllOrder = async (request: Request, response: Response) => {
 
-        try {
+    try {
         const order = await getOrder();
         response.json({
             ok: true,
@@ -16,12 +16,12 @@ export const getAllOrder = async (request : Request, response: Response ) => {
         console.error(error);
         throw new Error("No se pudo obtener la orden");
     }
-} 
+}
 
 export const createOrder = async (request: Request, response: Response) => {
     try {
-        const { userId , totalAmount, orderStatusId, shippingAddressId} = request.body;
-        const newOrder: IOrder= {
+        const { userId, totalAmount, orderStatusId, shippingAddressId } = request.body;
+        const newOrder: IOrder = {
             userId: userId,
             totalAmount: totalAmount,
             orderStatusId: orderStatusId,
@@ -46,13 +46,13 @@ export const createOrder = async (request: Request, response: Response) => {
 
 };
 
-export const updateOrder= async (request: Request, response: Response) => {
+export const updateOrder = async (request: Request, response: Response) => {
 
     try {
 
         const orderId = request.params.id;
-        const { userId , totalAmount, orderStatusId, shippingAddressId, active} = request.body;
-        const updateOrder: IOrder= {
+        const { userId, totalAmount, orderStatusId, shippingAddressId, active } = request.body;
+        const updateOrder: IOrder = {
             userId: userId,
             totalAmount: totalAmount,
             orderStatusId: orderStatusId,
