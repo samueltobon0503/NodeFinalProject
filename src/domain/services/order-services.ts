@@ -4,7 +4,7 @@ import { IOrder } from "../models/IOrder";
 
 export const getOrder = async () => {
     try {
-        return await Order.find();
+        return await Order.find().populate("shippingAddressId");
     } catch (error) {
         console.error(error);
         throw new Error("Hubo un error obteniendo las ordenes");
