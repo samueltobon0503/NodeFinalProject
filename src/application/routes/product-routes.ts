@@ -4,13 +4,13 @@ import { verifyAuthToken } from "../middlewares/jwt-verification";
 
 const productRouter: Router = express.Router();
 
-productRouter.get('/product', getAllProduct);
+productRouter.get('/product', verifyAuthToken, getAllProduct);
 
-productRouter.post('/product', createProduct);
+productRouter.post('/product', verifyAuthToken, createProduct);
 
-productRouter.put('/product/:id', updateProduct);
+productRouter.put('/product/:id', verifyAuthToken, updateProduct);
 
-productRouter.delete('/product/delete/:id', deleteProduct);
+productRouter.delete('/product/delete/:id', verifyAuthToken, deleteProduct);
 
 
 export default productRouter;

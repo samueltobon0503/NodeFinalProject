@@ -4,8 +4,8 @@ import { createAddress } from "../controllers/address-controller";
 
 const addressRouter: Router = express.Router();
 
-addressRouter.post('/address', createAddress);
+addressRouter.post('/address', verifyAuthToken, createAddress);
 
-addressRouter.delete('/address/delete/:id', createAddress);
+addressRouter.delete('/address/delete/:id', verifyAuthToken, createAddress);
 
 export default addressRouter;
