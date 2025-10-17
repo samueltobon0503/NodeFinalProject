@@ -1,8 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config()
-import { generateToken, verifyToken } from './infraestructure/auth/jwt-service';
 import express, { Application } from "express";
-import observable$ from "./observable";
 import appRouter from "./application/routes/app-routes";
 import { dbConnection } from "./infraestructure/config/mongoDB";
 

@@ -6,10 +6,10 @@ const DB_NAME: string = '';
 export const dbConnection = async () => {
     try {
         await mongoose.connect(`${MONGOATLAS_URL}/${DB_NAME}`);
-        console.log("Is online putos")
+        console.log("Base de datos conectada correctamente")
     } catch (error) {
         console.error(error);
-        throw new Error("Se cagó la conexión de la db");
+        throw new Error("Base de datos no conectada");
     }
 }
 
