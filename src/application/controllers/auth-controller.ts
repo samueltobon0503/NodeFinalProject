@@ -1,38 +1,36 @@
+import { getUserByEmail } from '../../domain/services/user-service';
 import { generateToken, JWTPayload } from './../../infraestructure/auth/jwt-service';
 import { Request, Response } from "express";
-
-const user = {
-    email: "samuel@gmail.com",
-    password: "12345"
-}
-
-interface LoginRequestParams {
-    email: string,
-    password: string
-}
+import bcrypt from "bcryptjs";
 
 export const login = async (request: Request, response: Response) => {
 
     try {
         const { email, password } = request.body;
 
-        if (email !== user.email) {
+        const user = await getUserByEmail(email);
+
+        if (!user) {
             return response.status(422).json({
-                error: "Error en las credenciales, verifica antes!"
+                ok: false,
+                error: "Usuario no encontrado"
             });
         }
 
-        if (password !== user.password) {
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
             return response.status(422).json({
-                error: "Error en las credenciales, verifica antes!"
+                ok: false,
+                error: "Credenciales incorrectas"
             });
         }
 
         const payload: JWTPayload = {
-            id: "1",
-            email: email,
-            role: "admin"
-        }
+            id: user.id,
+            email: user.email,
+            role: user.isAdmin ? "admin" : "user"
+        };
 
         const token = generateToken(payload)
 
