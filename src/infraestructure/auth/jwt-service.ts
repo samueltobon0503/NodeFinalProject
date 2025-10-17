@@ -16,8 +16,6 @@ export const generateToken = (payload: JWTPayload): string => {
             algorithm: 'HS256',
             expiresIn: JWT_EXPIRE_IN as any
         };
-        console.log('JWT_SECRET:', JWT_SECRET);
-        console.log('JWT_EXPIRE_IN:', JWT_EXPIRE_IN);
         const token = jwt.sign(payload, JWT_SECRET, options);
 
         return token;
