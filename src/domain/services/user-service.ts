@@ -10,6 +10,15 @@ export const getUsers = async () => {
     }
 }
 
+export const getUserByEmail = async (email:string) => {
+    try {
+        return await User.findOne({ email });
+    } catch (error) {
+        console.error(error);
+        throw new Error("Hubo un error obteniendo el usuario");
+    }
+}
+
 export const saveUser = async (user: IUser) => {
     try {
         const newUser = new User(user);

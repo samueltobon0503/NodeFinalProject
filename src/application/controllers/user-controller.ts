@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { v4 as uuidv4 } from "uuid";
 import { IUser } from "../../domain/models/IUser";
+import bcrypt from "bcryptjs";
 import { getUsers, inactiveLUser, saveUser, updateLUser } from "../../domain/services/user-service";
 
 export const getAllUsers = async (request: Request, response: Response) => {
@@ -15,12 +15,15 @@ export const getAllUsers = async (request: Request, response: Response) => {
         console.error(error);
         throw new Error("No se pudo obtener el usuario");
     }
-
 };
 
 export const createUser = async (request: Request, response: Response) => {
     try {
-        const { name, lastName, email, userName } = request.body;
+        const { name, lastName, email, password, userName } = request.body;
+
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
         const newUser: IUser = {
             name: name,
             lastName: lastName,
@@ -28,7 +31,8 @@ export const createUser = async (request: Request, response: Response) => {
             email: email,
             userName: userName,
             isAdmin: false,
-            active: true
+            active: true,
+            password: hashedPassword
         }
         const result = await saveUser(newUser);
         response.json({
@@ -52,7 +56,7 @@ export const updateUser = async (request: Request, response: Response) => {
     try {
 
         const userId = request.params.id;
-        const { name, lastName, email, userName, isAdmin, creatdAt, active } = request.body;
+        const { name, lastName, email, password, userName, isAdmin, creatdAt, active } = request.body;
         const updateUser: IUser = {
             name: name,
             lastName: lastName,
@@ -60,8 +64,9 @@ export const updateUser = async (request: Request, response: Response) => {
             email: email,
             userName: userName,
             isAdmin: isAdmin,
-            active: active
-        }
+            active: active,
+            password: password
+        } 
 
         const user = await updateLUser(userId, updateUser);
         if (!user) {

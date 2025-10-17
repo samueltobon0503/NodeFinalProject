@@ -12,6 +12,7 @@ jest.mock('../../domain/services/user-service', () => ({
             isAdmin: false,
             createdAt: "2025-10-15T16:31:54.697Z",
             active: true,
+            password: "test",
             __v: 0
         }
     })
@@ -26,7 +27,7 @@ describe('user-controller tests', () => {
 
         test('should create a new user', async () => {
 
-            const mockUser = { name: "test", lastName: "test", email: "test@test.com", userName: "test" }
+            const mockUser = { name: "test", lastName: "test", email: "test@test.com", password: "test", userName: "test" }
 
             const request = createRequest({
                 body: {
@@ -34,6 +35,7 @@ describe('user-controller tests', () => {
                     lastname: mockUser.lastName,
                     email: mockUser.email,
                     userName: mockUser.userName,
+                    password: mockUser.password
                 }
             });
 
@@ -54,6 +56,7 @@ describe('user-controller tests', () => {
                     isAdmin: false,
                     createdAt: "2025-10-15T16:31:54.697Z",
                     active: true,
+                    password: "test",
                     __v: 0
                 }
             });
