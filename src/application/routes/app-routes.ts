@@ -4,6 +4,7 @@ import authRouter from "./auth-routes";
 import shipmentRouter from "./shipment-routes";
 import productRouter from "./product-routes";
 import orderRouter from "./order-routes";
+import addressRouter from "./address-routes";
 
 const appRouter: Router = Router();
 
@@ -19,5 +20,7 @@ appRouter.use('/', authRouter);
 appRouter.use('/', shipmentRouter);
 appRouter.use('/', productRouter);
 appRouter.use('/', orderRouter);
+appRouter.use('/', addressRouter);
+
 
 export default appRouter;
