@@ -99,7 +99,7 @@ export const deleteShipment = async (request: Request, response: Response) => {
             data: shipment
         })
     } catch (error) {
-        response.status(500).json({
+        response.status(404).json({
             ok: false,
             message: "Error al eliminar el envio",
             error: error.message || error
