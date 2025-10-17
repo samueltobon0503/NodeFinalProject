@@ -12,4 +12,3 @@ export const dbConnection = async () => {
         throw new Error("Base de datos no conectada");
     }
 }
-
