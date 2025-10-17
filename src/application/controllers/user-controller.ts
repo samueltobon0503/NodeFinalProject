@@ -102,7 +102,7 @@ export const inactiveUser = async (request: Request, response: Response) => {
     } catch (error) {
         response.status(500).json({
             ok: false,
-            message: "Error al actualizar el usuario",
+            message: "Error al desactivar el usuario",
             error: error.message || error
         });
     }
