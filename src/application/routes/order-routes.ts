@@ -4,13 +4,13 @@ import { verifyAuthToken } from "../middlewares/jwt-verification";
 
 const orderRouter: Router = express.Router();
 
-orderRouter.get('/order', getAllOrder);
+orderRouter.get('/order', verifyAuthToken, getAllOrder);
 
-orderRouter.post('/order', createOrder);
+orderRouter.post('/order', verifyAuthToken, createOrder);
 
-orderRouter.put('/order/:id', updateOrder);
+orderRouter.put('/order/:id', verifyAuthToken, updateOrder);
 
-orderRouter.put('/order/inactive/:id', inactiveOrder);
+orderRouter.put('/order/inactive/:id', verifyAuthToken, inactiveOrder);
 
 
 export default orderRouter;
