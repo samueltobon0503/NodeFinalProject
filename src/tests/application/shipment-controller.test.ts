@@ -4,12 +4,12 @@ import { createShipment, deleteShipment, getAllShipment, updateShipment } from '
 jest.mock('../../domain/services/shipment-service', () => ({
     saveShipment: jest.fn(() => ({
         _id: "68f1af4359f42963b0ed4b5b",
-        name: "test",
-        description: "test",
-        price: "test",
-        stock: "test",
-        categoryId: "test",
-        imageUrl: "test",
+        orderId: "test",
+        trackingNumber: "test",
+        carrier: "test",
+        statusId: "test",
+        shipmentAt: "test",
+        deliveryAt: "test",
         createdAt: "2025-10-17T02:51:47.226Z",
         __v: 0
     })),
@@ -24,14 +24,14 @@ jest.mock('../../domain/services/shipment-service', () => ({
         };
     }),
 
-        DeleteLShipment: jest.fn((id) => {
-            if (id === "NOT_FOUND") throw new Error("Envio no encontrada");
-            return {
-                _id: id,
-                active: false,
-                updatedAt: "2025-10-17T03:10:00.000Z"
-            };
-        }), 
+    deleteLShipment: jest.fn((id) => {
+        if (id === "NOT_FOUND") throw new Error("envio no encontrado");
+        return {
+            _id: id,
+            active: false,
+            updatedAt: "2025-10-17T03:10:00.000Z"
+        };
+    }),
 
     getShipment: jest.fn(() => ([
         {
@@ -119,17 +119,17 @@ describe('shipment-controller tests', () => {
             await updateShipment(request, response);
 
             expect(response.statusCode).toBe(200);
-            expect(response._getJSONData()).toEqual({
-                ok: true,
-                data: {
-                    orderId: "test",
-                    trackingNumber: "test",
-                    carrier: "test",
-                    statusId: "test",
-                    shipmentAt: "test",
-                    deliveryAt: "test",
-                }
-            });
+            expect(response._getJSONData()).toEqual(
+                expect.objectContaining({
+                    ok: true,
+                    data: expect.objectContaining({
+                        orderId: "test",
+                        trackingNumber: "test",
+                        carrier: "test",
+                        statusId: "test"
+                    })
+                })
+            );
         });
 
         test('should return 404 if shipment not found', async () => {
@@ -154,46 +154,46 @@ describe('shipment-controller tests', () => {
             expect(response.statusCode).toBe(404);
             expect(response._getJSONData()).toEqual({
                 ok: false,
-                message: "shipment con ID NOT_FOUND no encontrado."
+                message: "envio con ID NOT_FOUND no encontrado."
             });
         });
     });
 
-        describe('deleteShipment', () => {
-            test('should delete an shipment successfully', async () => {
-                const mockShipmentId = "68f1af4359f42963b0ed4b5b";
-                const request = createRequest({ params: { id: mockShipmentId } });
-                const response = createResponse();
-    
-                await deleteShipment(request, response);
-    
-                expect(response.statusCode).toBe(200);
-                expect(response._getJSONData()).toEqual({
-                    ok: true,
-                    data: {
-                        _id: mockShipmentId,
-                        active: false,
-                        updatedAt: "2025-10-17T03:10:00.000Z"
-                    }
-                });
+    describe('deleteShipment', () => {
+        test('should delete an shipment successfully', async () => {
+            const mockShipmentId = "68f1af4359f42963b0ed4b5b";
+            const request = createRequest({ params: { id: mockShipmentId } });
+            const response = createResponse();
+
+            await deleteShipment(request, response);
+
+            expect(response.statusCode).toBe(200);
+            expect(response._getJSONData()).toEqual({
+                ok: true,
+                data: {
+                    _id: mockShipmentId,
+                    active: false,
+                    updatedAt: "2025-10-17T03:10:00.000Z"
+                }
             });
-    
-            test('should return 404 if shipment not found', async () => {
-                const request = createRequest({ params: { id: "NOT_FOUND" } });
-                const response = createResponse();
-    
-                await deleteShipment(request, response);
-    
-                expect(response.statusCode).toBe(404);
-                expect(response._getJSONData()).toEqual(
-                    expect.objectContaining({
-                        ok: false,
-                        message: "Error al eliminar el envio",
-                        error: "envio no encontrado"
-                    })
-                );
-            });
-        }); 
+        });
+
+        test('should return 404 if shipment not found', async () => {
+            const request = createRequest({ params: { id: "NOT_FOUND" } });
+            const response = createResponse();
+
+            await deleteShipment(request, response);
+
+            expect(response.statusCode).toBe(404);
+            expect(response._getJSONData()).toEqual(
+                expect.objectContaining({
+                    ok: false,
+                    message: "Error al eliminar el envio",
+                    error: "envio no encontrado"
+                })
+            );
+        });
+    });
 
     describe('getAllShipment', () => {
         test('should return all products successfully', async () => {

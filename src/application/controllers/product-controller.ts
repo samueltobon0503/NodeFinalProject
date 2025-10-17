@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { IProduct } from "../../domain/models/IProduct";
-import { getProduct,deleteLProduct, saveProduct, updateLProduct } from "../../domain/services/product-services";
+import { getProduct,deleteLProduct, saveProduct, updateLProduct } from "../../domain/services/product-service";
 
 
 
