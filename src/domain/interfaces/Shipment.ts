@@ -7,7 +7,7 @@ const salesSchema = new Schema<IShipment>({
     carrier : { type: String, required: true },
     statusId : { type: String, required: true},
     shipmentAt : { type: Date , default: new Date() },
-    deliveryAt : { type: Date, default: new Date()}
+    deliveryAt : { type: Date, default: new Date()},
 })
 
 

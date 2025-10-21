@@ -5,6 +5,7 @@ import shipmentRouter from "./shipment-routes";
 import productRouter from "./product-routes";
 import orderRouter from "./order-routes";
 import addressRouter from "./address-routes";
+import productCategoryRouter from "./product-categories-routes";
 
 const appRouter: Router = Router();
 
@@ -21,6 +22,7 @@ appRouter.use('/', shipmentRouter);
 appRouter.use('/', productRouter);
 appRouter.use('/', orderRouter);
 appRouter.use('/', addressRouter);
+appRouter.use('/', productCategoryRouter);
 
 
 export default appRouter;

@@ -20,7 +20,7 @@ export const createAddress = async (request: Request, response: Response) => {
             ok: true,
             staus: 'created',
             data: result
-        })
+        });
     } catch (error) {
         console.error(error);
         response.status(500).json({

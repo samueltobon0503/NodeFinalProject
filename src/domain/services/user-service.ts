@@ -19,6 +19,15 @@ export const getUserByEmail = async (email:string) => {
     }
 }
 
+export const getUserById = async (id:string) => {
+    try {
+        return await User.findOne({ id });
+    } catch (error) {
+        console.error(error);
+        throw new Error("Hubo un error obteniendo el usuario");
+    }
+}
+
 export const saveUser = async (user: IUser) => {
     try {
         const newUser = new User(user);
@@ -57,3 +66,13 @@ export const inactiveLUser = async (userId: string) => {
         throw new Error("Hubo un error inactivando el usuario");
     }
 }
+
+export const verifyUserEmail = async (token: string) => {
+  try {
+    const user = await User.findOne({ verificationToken: token });
+    return user;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error al verificar el token del correo");
+  }
+};

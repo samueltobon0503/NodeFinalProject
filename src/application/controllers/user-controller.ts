@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { IUser } from "../../domain/models/IUser";
 import bcrypt from "bcryptjs";
-import { getUsers, inactiveLUser, saveUser, updateLUser } from "../../domain/services/user-service";
+import crypto from "crypto";
+import { getUserByEmail, getUsers, inactiveLUser, saveUser, updateLUser, verifyUserEmail } from "../../domain/services/user-service";
+import { sendEmail } from "../../infraestructure/emails/email.service";
 
 export const getAllUsers = async (request: Request, response: Response) => {
 
@@ -21,8 +23,26 @@ export const createUser = async (request: Request, response: Response) => {
     try {
         const { name, lastName, email, password, userName } = request.body;
 
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return response.status(400).json({
+                ok: false,
+                error: "La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas y números."
+            });
+        }
+
+        const user = await getUserByEmail(email);
+
+        if (user) {
+            return response.status(422).json({
+                ok: false,
+                error: "El usuario ya existe"
+            });
+        }
+
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const verificationToken = crypto.randomBytes(32).toString("hex");
 
         const newUser: IUser = {
             name: name,
@@ -32,14 +52,27 @@ export const createUser = async (request: Request, response: Response) => {
             userName: userName,
             isAdmin: false,
             active: true,
-            password: hashedPassword
+            password: hashedPassword,
+            verified: false,
+            verificationToken,
         }
+
         const result = await saveUser(newUser);
+        const verificationUrl = `http://localhost:4000/api/auth/verify-email?token=${verificationToken}`;
+
+        await sendEmail(
+            email,
+            "Bienvenido a Aliestres",
+            `<h2>Hola ${name} ${lastName}</h2>
+        <p>Gracias por registrarte. Por favor confirma tu correo haciendo clic en el siguiente enlace:</p>
+        <a href="${verificationUrl}">Verificar mi cuenta</a>`
+        );
+
         response.json({
             ok: true,
             staus: 'created',
-            data: result
-        })
+            data: `Usuario ${name} ${lastName} creado exitosamente`
+        });
     } catch (error) {
         console.error(error);
         response.status(500).json({
@@ -57,28 +90,28 @@ export const updateUser = async (request: Request, response: Response) => {
 
         const userId = request.params.id;
         const { name, lastName, email, password, userName, isAdmin, creatdAt, active } = request.body;
-        const updateUser: IUser = {
-            name: name,
-            lastName: lastName,
-            createdAt: creatdAt,
-            email: email,
-            userName: userName,
-            isAdmin: isAdmin,
-            active: active,
-            password: password
-        } 
+        // const updateUser: IUser = {
+        //     name: name,
+        //     lastName: lastName,
+        //     createdAt: creatdAt,
+        //     email: email,
+        //     userName: userName,
+        //     isAdmin: isAdmin,
+        //     active: active,
+        //     password: password
+        // }
 
-        const user = await updateLUser(userId, updateUser);
-        if (!user) {
-            return response.status(404).json({
-                ok: false,
-                message: `Usuario con ID ${userId} no encontrado.`
-            });
-        }
-        response.json({
-            ok: true,
-            data: user
-        })
+        // const user = await updateLUser(userId, updateUser);
+        // if (!user) {
+        //     return response.status(404).json({
+        //         ok: false,
+        //         message: `Usuario con ID ${userId} no encontrado.`
+        //     });
+        // }
+        // response.json({
+        //     ok: true,
+        //     data: user
+        // })
     } catch (error) {
         response.status(500).json({
             ok: false,
@@ -107,4 +140,25 @@ export const inactiveUser = async (request: Request, response: Response) => {
         });
     }
 
+};
+
+export const verifyEmail = async (req: Request, res: Response) => {
+  try {
+    console.log("✅ Entró a verifyEmail:", req.query);
+    const { token } = req.query;
+    const user = await verifyUserEmail(token as string);
+
+    if (!user) {
+      return res.status(400).json({ ok: false, message: "Token inválido o expirado" });
+    }
+
+    user.verified = true;
+    user.verificationToken = undefined;
+    await updateLUser(user.id, user);
+
+    res.json({ ok: true, message: "Correo verificado exitosamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, message: "Error al verificar el correo" });
+  }
 };

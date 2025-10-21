@@ -2,7 +2,34 @@ import { Product } from "../interfaces/Product";
 import { IProduct } from "../models/IProduct";
 
 
-export const getProduct = async () => {
+export const getProduct = async (filters: any = {}) => {
+    try {
+        const query: any = { active: true, stock: { $gt: 0 } };
+
+        if (filters.name) {
+            query.name = { $regex: filters.name, $options: "i" };
+        }
+
+        if (filters.categoryId) {
+            query.categoryId = filters.categoryId;
+        }
+
+        if (filters.minPrice || filters.maxPrice) {
+            query.price = {};
+            if (filters.minPrice) query.price.$gte = Number(filters.minPrice);
+            if (filters.maxPrice) query.price.$lte = Number(filters.maxPrice);
+        }
+
+        const products = await Product.find(query);
+        return products;
+
+    } catch (error) {
+        console.error(error);
+        throw new Error("Hubo un error obteniendo los productos");
+    }
+}
+
+export const getProductAdmin = async () => {
     try {
         return await Product.find();
     } catch (error) {
@@ -38,12 +65,12 @@ export const updateLProduct = async (productId: string, updateData: IProduct) =>
 
 export const deleteLProduct = async (productId: string) => {
     try {
-        const deleteProduct = await Product.deleteOne({_id :productId});
+        const deleteProduct = await Product.deleteOne({ _id: productId });
 
-        if(deleteProduct.deletedCount === 0){
-            throw new Error(`No se encontro ningun envio con el id ${productId} para eliminar el producto`); 
+        if (deleteProduct.deletedCount === 0) {
+            throw new Error(`No se encontro ningun envio con el id ${productId} para eliminar el producto`);
         }
-        return {message: "Producto fue eliminado correctamente", deleteLProduct};
+        return { message: "Producto fue eliminado correctamente", deleteLProduct };
     } catch (error) {
         console.error(error);
         throw new Error("Hubo un error eliminando el producto");

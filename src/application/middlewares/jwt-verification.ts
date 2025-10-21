@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from "express";
-import { JWTPayload, verifyToken } from "../../infraestructure/auth/jwt-service";
+import { AuthRequest, JWTPayload, verifyToken } from "../../infraestructure/auth/jwt-service";
 
 
-export const verifyAuthToken = (req: Request, res: Response, next: NextFunction) => {
+export const verifyAuthToken = (req, res, next) => {
     const headerToken = req.headers['authorization'];
 
     try {
         const decodedpayload: JWTPayload = verifyToken(headerToken);
-        console.log(decodedpayload)
+         (req as AuthRequest).user = decodedpayload;
 
     } catch (error) {
         res.status(401).json({

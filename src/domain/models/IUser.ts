@@ -6,5 +6,9 @@ export interface IUser {
     userName: string,
     isAdmin: boolean,
     createdAt: Date
-    active: boolean
+    active: boolean,
+    failedAttempts?: number;
+    lockUntil?: Date | null;
+    verified: boolean;
+    verificationToken?: string;
 }

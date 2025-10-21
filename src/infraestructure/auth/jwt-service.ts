@@ -6,6 +6,10 @@ export interface JWTPayload {
     id: string,
 }
 
+export interface AuthRequest extends Request {
+  user?: JWTPayload;
+}
+
 const JWT_SECRET = process.env.JWT_SECRET as string
 const JWT_EXPIRE_IN = process.env.JWT_EXPIRE_IN 
 
