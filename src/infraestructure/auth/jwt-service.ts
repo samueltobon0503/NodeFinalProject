@@ -1,4 +1,5 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
+import { Request } from "express";
 
 export interface JWTPayload {
     email: string,
@@ -6,10 +7,14 @@ export interface JWTPayload {
     id: string,
 }
 
-export interface AuthRequest extends Request {
+export interface AuthRequest<
+  P = any,
+  ResBody = any,
+  ReqBody = any,
+  ReqQuery = any
+> extends Request<P, ResBody, ReqBody, ReqQuery> {
   user?: JWTPayload;
 }
-
 const JWT_SECRET = process.env.JWT_SECRET as string
 const JWT_EXPIRE_IN = process.env.JWT_EXPIRE_IN 
 

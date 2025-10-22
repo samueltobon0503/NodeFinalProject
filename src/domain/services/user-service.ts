@@ -21,7 +21,7 @@ export const getUserByEmail = async (email:string) => {
 
 export const getUserById = async (id:string) => {
     try {
-        return await User.findOne({ id });
+        return await User.findOne({ _id: id });
     } catch (error) {
         console.error(error);
         throw new Error("Hubo un error obteniendo el usuario");

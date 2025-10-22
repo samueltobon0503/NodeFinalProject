@@ -10,6 +10,7 @@ const PORT:number = 4000;
 const app : Application = express();
 
 app.use (express.json());
+
 app.use('/api', appRouter)
 
 app.listen(PORT, () => {

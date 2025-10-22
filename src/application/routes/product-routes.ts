@@ -9,11 +9,11 @@ productRouter.get('/product', verifyAuthToken, getAllProduct);
 
 productRouter.get('/product/admin', verifyAuthToken, verifyRole("admin"), getAllProductAdmin);
 
-productRouter.post('/product', verifyAuthToken, createProduct);
+productRouter.post('/product', verifyAuthToken, verifyRole("admin"), createProduct);
 
-productRouter.put('/product/:id', verifyAuthToken, updateProduct);
+productRouter.put('/product/:id', verifyAuthToken, verifyRole("admin"), updateProduct);
 
-productRouter.delete('/product/delete/:id', verifyAuthToken, deleteProduct);
+productRouter.delete('/product/delete/:id', verifyAuthToken, verifyRole("admin"), deleteProduct);
 
 
 export default productRouter;

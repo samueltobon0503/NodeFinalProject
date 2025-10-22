@@ -81,6 +81,9 @@ export const updateProduct = async (request: Request, response: Response) => {
             createdAt: new Date(),
             active: active
         }
+        if (stock !== undefined && stock < 0) {
+            throw new Error("El stock no puede ser negativo.");
+        }
 
         const product = await updateLProduct(productId, updateProduct);
         if (!product) {
@@ -114,6 +117,7 @@ export const deleteProduct = async (request: Request, response: Response) => {
                 message: "El id no es valido"
             });
         }
+
         const product = await deleteLProduct(productId);
         return response.json({
             ok: true,

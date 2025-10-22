@@ -8,11 +8,11 @@ export const verifyUserEmailConfirmed = async (
   next: NextFunction
 ) => {
   try {
-    const authReq = req as unknown as AuthRequest;
-    console.log("Entro", authReq)
-    
-    const user = await getUserById(authReq.user.id);
+    const userId = ((req as unknown) as AuthRequest).user?.id;
+    console.log("usuario", userId)
+    const user = await getUserById(userId);
 
+    console.log("usuarioi", user)
     if (!user?.verified) {
       return res.status(403).json({
         ok: false,

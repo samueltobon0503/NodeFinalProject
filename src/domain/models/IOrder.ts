@@ -1,11 +1,20 @@
 import { Types } from "mongoose";
 
-export interface IOrder {
-    userId: string,
-    totalAmount: string,
-    orderStatusId: string,
-    shippingAddressId: Types.ObjectId,
-    createdAt: Date,
-    active: boolean
+export interface IOrderItem {
+  productId: Types.ObjectId;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
 }
 
+export interface IOrder {
+  userId: string;
+  orderNumber: string;
+  items: IOrderItem[];
+  totalAmount: number;
+  orderStatusId: "PENDIENTE" | "PREPARANDO" | "EN_TRANSITO" | "EN_ENTREGA" | "ENTREGADO" | "CANCELADO";
+  shippingAddressId: Types.ObjectId;
+  createdAt: Date;
+  active: boolean;
+}

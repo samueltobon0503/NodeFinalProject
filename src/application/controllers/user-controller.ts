@@ -144,7 +144,6 @@ export const inactiveUser = async (request: Request, response: Response) => {
 
 export const verifyEmail = async (req: Request, res: Response) => {
   try {
-    console.log("✅ Entró a verifyEmail:", req.query);
     const { token } = req.query;
     const user = await verifyUserEmail(token as string);
 

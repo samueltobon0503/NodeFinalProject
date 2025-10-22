@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { IOrder } from "../../domain/models/IOrder";
-import { getOrder, inactiveLOrder, saveOrder, updateLOrder } from "../../domain/services/order-service";
+import { createOrderFromCheckout, getOrder, getOrderStatus, inactiveLOrder, updateOrderStatus } from "../../domain/services/order-service";
+import { AuthRequest } from "../../infraestructure/auth/jwt-service";
 
 
 
@@ -18,68 +19,59 @@ export const getAllOrder = async (request: Request, response: Response) => {
     }
 }
 
-export const createOrder = async (request: Request, response: Response) => {
-    try {
-        const { userId, totalAmount, orderStatusId, shippingAddressId } = request.body;
-        const newOrder: IOrder = {
-            userId: userId,
-            totalAmount: totalAmount,
-            orderStatusId: orderStatusId,
-            shippingAddressId: shippingAddressId,
-            createdAt: new Date(),
-            active: true,
-        }
-        const result = await saveOrder(newOrder);
-        response.json({
-            ok: true,
-            staus: 'created',
-            data: result
-        })
-    } catch (error) {
-        console.error(error);
-        response.status(500).json({
-            ok: false,
-            message: "Error al crear la orden",
-            error: error.message || error
-        });
-    }
+export const getOrderStatusController = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ ok: false, message: "Usuario no autenticado" });
 
+    const { orderId } = req.params;
+    const result = await getOrderStatus(userId, orderId);
+
+    return res.status(200).json({ ok: true, data: result });
+  } catch (error: any) {
+    console.error(error);
+    const status = error.status || 400;
+    return res.status(status).json({ ok: false, message: error.message || "Error obteniendo estado" });
+  }
 };
 
-export const updateOrder = async (request: Request, response: Response) => {
+export const placeOrder = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { addressId } = req.body;
+    const order = await createOrderFromCheckout(userId,addressId);
+    res.json({
+      ok: true,
+      message: "Orden creada exitosamente",
+      data: order,
+    });
+  } catch (error: any) {
+    console.error(error);
+    res.status(400).json({ ok: false, message: error.message || "Error al crear la orden" });
+  }
+};
 
-    try {
+export const changeOrderStatusController = async (req: AuthRequest, res: Response) => {
+  try {
+    const { orderId } = req.params;
+    const { newStatus } = req.body;
 
-        const orderId = request.params.id;
-        const { userId, totalAmount, orderStatusId, shippingAddressId, active } = request.body;
-        const updateOrder: IOrder = {
-            userId: userId,
-            totalAmount: totalAmount,
-            orderStatusId: orderStatusId,
-            shippingAddressId: shippingAddressId,
-            createdAt: new Date(),
-            active: active,
-        }
-
-        const order = await updateLOrder(orderId, updateOrder);
-        if (!order) {
-            return response.status(404).json({
-                ok: false,
-                message: `orden con ID ${orderId} no encontrado.`
-            });
-        }
-        response.json({
-            ok: true,
-            data: order
-        })
-    } catch (error) {
-        response.status(500).json({
-            ok: false,
-            message: "Error al actualizar la orden",
-            error: error.message || error
-        });
+    if (!newStatus) {
+      return res.status(400).json({ ok: false, message: "newStatus es requerido en el body" });
     }
 
+    const updatedOrder = await updateOrderStatus(orderId, newStatus);
+
+    return res.status(200).json({
+      ok: true,
+      message: `Estado actualizado a ${newStatus}`,
+      data: updatedOrder,
+    });
+  } catch (error: any) {
+    console.error(error);
+    const status = error.status || 400;
+    return res.status(status).json({ ok: false, message: error.message || "Error cambiando estado" });
+  }
 };
 
 export const inactiveOrder = async (request: Request, response: Response) => {

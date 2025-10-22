@@ -1,3 +1,4 @@
+import { Product } from "../interfaces/Product";
 import { ProductCategory } from "../interfaces/ProductCategory";
 import { IProductCategory } from "../models/IProductCategory";
 
@@ -18,5 +19,19 @@ export const saveProductCategory = async (product: IProductCategory) => {
     } catch (error) {
         console.error("Error al guardar la categoria:", error);
         throw new Error(error.message || "Fallo la creación de una categoria de producto");
+    }
+}
+
+export const inactiveLCategory = async (categoryId: string) => {
+    try {
+        const inactiveCategory = await ProductCategory.findByIdAndUpdate(
+            categoryId,
+            { active: false},
+            { new: true }
+        );
+        return inactiveCategory;
+    } catch (error) {
+        console.error(error);
+        throw new Error("Hubo un error inactivando el usuario");
     }
 }
