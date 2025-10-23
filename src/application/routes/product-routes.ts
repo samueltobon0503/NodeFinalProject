@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { createProduct, getAllProduct, deleteProduct, updateProduct, getAllProductAdmin } from "../controllers/product-controller";
+import { createProduct, getAllProduct, deleteProduct, getAllProductAdmin } from "../controllers/product-controller";
 import { verifyAuthToken } from "../middlewares/jwt-verification";
 import { verifyRole } from "../middlewares/role-verification";
 
@@ -10,8 +10,6 @@ productRouter.get('/product', verifyAuthToken, getAllProduct);
 productRouter.get('/product/admin', verifyAuthToken, verifyRole("admin"), getAllProductAdmin);
 
 productRouter.post('/product', verifyAuthToken, verifyRole("admin"), createProduct);
-
-productRouter.put('/product/:id', verifyAuthToken, verifyRole("admin"), updateProduct);
 
 productRouter.delete('/product/delete/:id', verifyAuthToken, verifyRole("admin"), deleteProduct);
 

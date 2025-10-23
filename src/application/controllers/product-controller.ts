@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { IProduct } from "../../domain/models/IProduct";
 import { getProduct, deleteLProduct, saveProduct, updateLProduct, getProductAdmin } from "../../domain/services/product-service";
 import { formatPrice } from "../../domain/utils/service.utils";
+import { Product } from "../../domain/interfaces/Product";
 
 
 
@@ -35,14 +36,15 @@ export const getAllProductAdmin = async (request: Request, response: Response) =
 
 export const createProduct = async (request: Request, response: Response) => {
     try {
-        const { name, description, price, stock, categoryId, imageUrl } = request.body;
-        const formattedPrice = formatPrice(price);
+        const { name, description, price, stock, categoryId, imageUrl, sku } = request.body;
+
         const newProduct: IProduct = {
             name: name,
             description: description,
-            price: formattedPrice,
+            price: price,
             stock: stock,
             categoryId: categoryId,
+            sku: sku,
             imageUrl: imageUrl,
             createdAt: new Date(),
             active: true
@@ -58,48 +60,6 @@ export const createProduct = async (request: Request, response: Response) => {
         response.status(500).json({
             ok: false,
             message: "Error al crear el producto",
-            error: error.message || error
-        });
-    }
-
-};
-
-export const updateProduct = async (request: Request, response: Response) => {
-
-    try {
-
-        const productId = request.params.id;
-        const { name, description, price, stock, categoryId, imageUrl, active } = request.body;
-        const formattedPrice = formatPrice(price);
-        const updateProduct: IProduct = {
-            name: name,
-            description: description,
-            price: formattedPrice,
-            stock: stock,
-            categoryId: categoryId,
-            imageUrl: imageUrl,
-            createdAt: new Date(),
-            active: active
-        }
-        if (stock !== undefined && stock < 0) {
-            throw new Error("El stock no puede ser negativo.");
-        }
-
-        const product = await updateLProduct(productId, updateProduct);
-        if (!product) {
-            return response.status(404).json({
-                ok: false,
-                message: `producto con ID ${productId} no encontrado.`
-            });
-        }
-        response.json({
-            ok: true,
-            data: product
-        })
-    } catch (error) {
-        response.status(500).json({
-            ok: false,
-            message: "Error al actualizar el producto",
             error: error.message || error
         });
     }

@@ -1,6 +1,7 @@
 const CURRENCY = "COP";
 
 export function formatPrice(value: string | number): string {
+  console.log("Preciosinho", value)
   const numericValue = typeof value === "string" ? parseFloat(value) : value;
 
   if (isNaN(numericValue)) {
@@ -11,6 +12,6 @@ export function formatPrice(value: string | number): string {
     style: "currency",
     currency: CURRENCY,
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   }).format(numericValue);
 }

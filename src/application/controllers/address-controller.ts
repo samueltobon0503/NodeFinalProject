@@ -7,6 +7,13 @@ export const createAddress = async (request: Request, response: Response) => {
     try {
         const { userId, street, postalCode, state, city, country } = request.body;
 
+        if (!isValidPostalCode(postalCode)) {
+            return response.status(400).json({
+                ok: false,
+                message: "El código postal no es válido. Debe tener 6 dígitos numéricos y no empezar con 0.",
+            });
+        }
+
         const newAddress: IAddress = {
             userId: userId,
             street: street,
@@ -29,4 +36,9 @@ export const createAddress = async (request: Request, response: Response) => {
             error: error.message || error
         });
     }
+};
+
+export const isValidPostalCode = (postalCode: string): boolean => {
+  const regex = /^[1-9][0-9]{5}$/;
+  return regex.test(postalCode);
 };

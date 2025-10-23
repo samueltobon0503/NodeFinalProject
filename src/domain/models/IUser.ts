@@ -5,7 +5,8 @@ export interface IUser {
     password: string,
     userName: string,
     isAdmin: boolean,
-    createdAt: Date
+    phone: string,
+    createdAt: Date,
     active: boolean,
     failedAttempts?: number;
     lockUntil?: Date | null;

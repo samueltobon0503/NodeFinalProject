@@ -7,6 +7,7 @@ const userSchema = new Schema<IUser>({
     email: { type: String, required: true },
     userName: { type: String, required: true },
     password: { type: String, required: true },
+    phone: { type: String, required: true },
     isAdmin: { type: Boolean, default: false, required: true },
     createdAt: { type: Date, default: new Date() },
     active: { type: Boolean, default: false, required: true },

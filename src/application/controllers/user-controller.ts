@@ -21,7 +21,7 @@ export const getAllUsers = async (request: Request, response: Response) => {
 
 export const createUser = async (request: Request, response: Response) => {
     try {
-        const { name, lastName, email, password, userName } = request.body;
+        const { name, lastName, email, password, userName, phone } = request.body;
 
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
         if (!passwordRegex.test(password)) {
@@ -40,6 +40,13 @@ export const createUser = async (request: Request, response: Response) => {
             });
         }
 
+        if (!isValidColombianPhone(phone)) {
+            return response.status(400).json({
+                ok: false,
+                message: "El número de teléfono no tiene un formato colombiano válido (+57 y 10 dígitos).",
+            });
+        }
+
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         const verificationToken = crypto.randomBytes(32).toString("hex");
@@ -51,6 +58,7 @@ export const createUser = async (request: Request, response: Response) => {
             email: email,
             userName: userName,
             isAdmin: false,
+            phone: phone,
             active: true,
             password: hashedPassword,
             verified: false,
@@ -84,44 +92,6 @@ export const createUser = async (request: Request, response: Response) => {
 
 };
 
-export const updateUser = async (request: Request, response: Response) => {
-
-    try {
-
-        const userId = request.params.id;
-        const { name, lastName, email, password, userName, isAdmin, creatdAt, active } = request.body;
-        // const updateUser: IUser = {
-        //     name: name,
-        //     lastName: lastName,
-        //     createdAt: creatdAt,
-        //     email: email,
-        //     userName: userName,
-        //     isAdmin: isAdmin,
-        //     active: active,
-        //     password: password
-        // }
-
-        // const user = await updateLUser(userId, updateUser);
-        // if (!user) {
-        //     return response.status(404).json({
-        //         ok: false,
-        //         message: `Usuario con ID ${userId} no encontrado.`
-        //     });
-        // }
-        // response.json({
-        //     ok: true,
-        //     data: user
-        // })
-    } catch (error) {
-        response.status(500).json({
-            ok: false,
-            message: "Error al actualizar el usuario",
-            error: error.message || error
-        });
-    }
-
-};
-
 export const inactiveUser = async (request: Request, response: Response) => {
 
     try {
@@ -143,21 +113,26 @@ export const inactiveUser = async (request: Request, response: Response) => {
 };
 
 export const verifyEmail = async (req: Request, res: Response) => {
-  try {
-    const { token } = req.query;
-    const user = await verifyUserEmail(token as string);
+    try {
+        const { token } = req.query;
+        const user = await verifyUserEmail(token as string);
 
-    if (!user) {
-      return res.status(400).json({ ok: false, message: "Token inválido o expirado" });
+        if (!user) {
+            return res.status(400).json({ ok: false, message: "Token inválido o expirado" });
+        }
+
+        user.verified = true;
+        user.verificationToken = undefined;
+        await updateLUser(user.id, user);
+
+        res.json({ ok: true, message: "Correo verificado exitosamente" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ ok: false, message: "Error al verificar el correo" });
     }
+};
 
-    user.verified = true;
-    user.verificationToken = undefined;
-    await updateLUser(user.id, user);
-
-    res.json({ ok: true, message: "Correo verificado exitosamente" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ ok: false, message: "Error al verificar el correo" });
-  }
+export const isValidColombianPhone = (phone: string): boolean => {
+    const regex = /^(?:\+57)?[0-9]{10}$/;
+    return regex.test(phone);
 };

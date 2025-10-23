@@ -1,5 +1,6 @@
 import { Product } from "../interfaces/Product";
 import { IProduct } from "../models/IProduct";
+import { formatPrice } from "../utils/service.utils";
 
 
 export const getProduct = async (filters: any = {}) => {
@@ -40,6 +41,27 @@ export const getProductAdmin = async () => {
 
 export const saveProduct = async (product: IProduct) => {
     try {
+        const { price, stock, sku, imageUrl } = product;
+        const formattedPrice = formatPrice(price);
+
+        if (!Number.isInteger(stock) || stock <= 0 || stock > 9999) {
+            throw new Error("El stock debe ser un número entero entre 1 y 9999.");
+        }
+
+        if (!sku || !/^[A-Za-z0-9]{8,20}$/.test(sku)) {
+            throw new Error("El SKU debe ser alfanumérico y tener entre 8 y 20 caracteres.");
+        }
+
+        const existingSKU = await Product.findOne({ sku });
+        if (existingSKU) {
+            throw new Error("El SKU ya está registrado en otro producto.");
+        }
+
+        if (!imageUrl || !/\.(jpg|jpeg|png)$/i.test(imageUrl)) {
+            throw new Error("La imagen debe tener formato JPG o PNG.");
+        }
+
+        product.price = formattedPrice;
         const newProduct = new Product(product);
         await newProduct.save();
         return newProduct;
