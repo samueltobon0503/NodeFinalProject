@@ -4,5 +4,7 @@ export interface IShipment {
     carrier: string,
     statusId: string,
     shipmentAt: Date,
-    deliveryAt: Date
+    deliveryAt?: Date;
+    updatedAt?: Date;
+    confirmedByCustomer?: boolean;
 }

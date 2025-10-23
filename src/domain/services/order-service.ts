@@ -112,7 +112,6 @@ export const getOrderStatus = async (userId: string, orderId: string) => {
 };
 
 export const updateOrderStatus = async (orderId: string, newStatusRaw: string) => {
-  // 1) Normalizar y validar newStatus contra el enum
   const ORDER_STATES = Object.values(OrderStatus) as OrderStatus[];
   const newStatus = newStatusRaw as OrderStatus;
   const newIndex = ORDER_STATES.indexOf(newStatus);
@@ -136,15 +135,12 @@ export const updateOrderStatus = async (orderId: string, newStatusRaw: string) =
     throw err;
   }
 
-  // 5) Obtener índices y validar retrocesos
   const currentIndex = ORDER_STATES.indexOf(order.orderStatusId as OrderStatus);
 
-  // Si no cambia nada -> retorno rápido (evita emails duplicados)
   if (order.orderStatusId === newStatus) {
     return order;
   }
 
-  // No permitir retroceder (salvo CANCELADO)
   if (newStatus !== OrderStatus.CANCELADO && newIndex < currentIndex) {
     const err: any = new Error(`No se permite retroceder en estados (actual: ${order.orderStatusId})`);
     err.status = 400;

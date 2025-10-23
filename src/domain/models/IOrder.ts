@@ -13,7 +13,7 @@ export interface IOrder {
   orderNumber: string;
   items: IOrderItem[];
   totalAmount: number;
-  orderStatusId: "PENDIENTE" | "PREPARANDO" | "EN_TRANSITO" | "EN_ENTREGA" | "ENTREGADO" | "CANCELADO";
+  orderStatusId: "PENDIENTE" | "PREPARANDO" | "EN_TRANSITO" | "EN_ENTREGA" | "ENTREGADO" | "CANCELADO" | "PERDIDO";
   shippingAddressId: Types.ObjectId;
   createdAt: Date;
   active: boolean;
