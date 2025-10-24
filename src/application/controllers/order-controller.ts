@@ -3,10 +3,7 @@ import { IOrder } from "../../domain/models/IOrder";
 import { createOrderFromCheckout, getOrder, getOrderStatus, inactiveLOrder, updateOrderStatus } from "../../domain/services/order-service";
 import { AuthRequest } from "../../infraestructure/auth/jwt-service";
 
-
-
 export const getAllOrder = async (request: Request, response: Response) => {
-
     try {
         const order = await getOrder();
         response.json({
@@ -22,8 +19,6 @@ export const getAllOrder = async (request: Request, response: Response) => {
 export const getOrderStatusController = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ ok: false, message: "Usuario no autenticado" });
-
     const { orderId } = req.params;
     const result = await getOrderStatus(userId, orderId);
 

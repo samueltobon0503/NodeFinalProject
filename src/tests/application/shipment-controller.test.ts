@@ -1,241 +1,156 @@
-import { createRequest, createResponse } from 'node-mocks-http';
-import { createShipment, deleteShipment, getAllShipment, updateShipment } from '../../application/controllers/shipment-controller';
+import { Request, Response } from 'express';
+import * as shipmentController from '../../application/controllers/shipment-controller';
+import * as shipmentService from '../../domain/services/shipment-service';
 
 jest.mock('../../domain/services/shipment-service', () => ({
-    saveShipment: jest.fn(() => ({
-        _id: "68f1af4359f42963b0ed4b5b",
-        orderId: "test",
-        trackingNumber: "test",
-        carrier: "test",
-        statusId: "test",
-        shipmentAt: "test",
-        deliveryAt: "test",
-        createdAt: "2025-10-17T02:51:47.226Z",
-        __v: 0
-    })),
-
-    updateLShipment: jest.fn((id, data) => {
-        if (id === "NOT_FOUND") return null;
-        return {
-            _id: id,
-            ...data,
-            createdAt: "2025-10-17T02:51:47.226Z",
-            __v: 0
-        };
-    }),
-
-    deleteLShipment: jest.fn((id) => {
-        if (id === "NOT_FOUND") throw new Error("envio no encontrado");
-        return {
-            _id: id,
-            active: false,
-            updatedAt: "2025-10-17T03:10:00.000Z"
-        };
-    }),
-
-    getShipment: jest.fn(() => ([
-        {
-            _id: "68f1af4359f42963b0ed4b5b",
-            orderId: "test",
-            trackingNumber: "test",
-            carrier: "test",
-            statusId: "test",
-            shipmentAt: "test",
-            deliveryAt: "test",
-            createdAt: "2025-10-17T02:51:47.226Z",
-            __v: 0
-        },
-        {
-            _id: "68f1af4359f42963b0ed4b5b",
-            orderId: "test",
-            trackingNumber: "test",
-            carrier: "test",
-            statusId: "test",
-            shipmentAt: "test",
-            deliveryAt: "test",
-            createdAt: "2025-10-17T02:51:47.226Z",
-        }
-    ]))
+  getShipment: jest.fn(),
+  assignShipment: jest.fn(),
+  deleteLShipment: jest.fn(),
 }));
 
-describe('shipment-controller tests', () => {
-    describe('createShipment', () => {
-        test('should create a new shipment', async () => {
-            const mockShipment = {
-                orderId: "test",
-                trackingNumber: "test",
-                carrier: "test",
-                statusId: "test",
-                shipmentAt: "test",
-            };
+const mockedService = shipmentService as unknown as jest.Mocked<typeof shipmentService>;
 
-            const request = createRequest({ body: mockShipment });
-            const response = createResponse();
+function mockRequest(body?: any, params?: any): Request {
+  return {
+    body: body ?? {},
+    params: params ?? {},
+  } as unknown as Request;
+}
 
-            await createShipment(request, response);
+function mockResponse() {
+  const res: Partial<Response> = {};
+  res.status = jest.fn().mockReturnValue(res as Response);
+  res.json = jest.fn().mockReturnValue(res as Response);
+  return res as Response;
+}
 
-            expect(response.statusCode).toBe(200);
-            expect(response._getJSONData()).toEqual({
-                ok: true,
-                staus: 'created',
-                data: {
-                    _id: "68f1af4359f42963b0ed4b5b",
-                    orderId: "test",
-                    trackingNumber: "test",
-                    carrier: "test",
-                    statusId: "test",
-                    shipmentAt: "test",
-                    deliveryAt: "test",
-                    createdAt: "2025-10-17T02:51:47.226Z",
-                    __v: 0
-                }
-            });
-        });
+describe('shipment-controller', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('getAllShipment', () => {
+    it('responde con los envíos cuando getShipment resuelve', async () => {
+      const shipments = [{ orderId: 'o1' }] as any;
+      mockedService.getShipment.mockResolvedValueOnce(shipments);
+
+      const req = mockRequest();
+      const res = mockResponse();
+
+      await shipmentController.getAllShipment(req, res);
+
+      expect(mockedService.getShipment).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        ok: true,
+        data: shipments,
+      });
     });
 
-    describe('updateShipment', () => {
-        test('should update an existing shipment', async () => {
-            const mockShipmentId = "68f1af4359f42963b0ed4b5b";
-            const mockShipmentUpdate = {
-                _id: "68f1af4359f42963b0ed4b5b",
-                orderId: "test",
-                trackingNumber: "test",
-                carrier: "test",
-                statusId: "test",
-                shipmentAt: "test",
-                deliveryAt: "test",
-                createdAt: "2025-10-17T02:51:47.226Z",
-                active: true,
-                __v: 0
-            };
+    it('lanza error cuando getShipment falla (implementación del controlador lo re-lanza)', async () => {
+      mockedService.getShipment.mockRejectedValueOnce(new Error('db fail'));
 
-            const request = createRequest({
-                params: { id: mockShipmentId },
-                body: mockShipmentUpdate
-            });
+      const req = mockRequest();
+      const res = mockResponse();
 
-            const response = createResponse();
+      await expect(shipmentController.getAllShipment(req, res)).rejects.toThrow('No se pudo obtener el envio');
+    });
+  });
 
-            await updateShipment(request, response);
+  describe('assignShipmentController', () => {
+    it('responde 400 si faltan orderId o carrier', async () => {
+      const req = mockRequest({}, {});
+      const res = mockResponse();
 
-            expect(response.statusCode).toBe(200);
-            expect(response._getJSONData()).toEqual(
-                expect.objectContaining({
-                    ok: true,
-                    data: expect.objectContaining({
-                        orderId: "test",
-                        trackingNumber: "test",
-                        carrier: "test",
-                        statusId: "test"
-                    })
-                })
-            );
-        });
+      await shipmentController.assignShipmentController(req, res);
 
-        test('should return 404 if shipment not found', async () => {
-            const request = createRequest({
-                params: { id: "NOT_FOUND" },
-                body: {
-                    _id: "68f1af4359f42963b0ed4b5b",
-                    orderId: "test",
-                    trackingNumber: "test",
-                    carrier: "test",
-                    statusId: "test",
-                    shipmentAt: "test",
-                    deliveryAt: "test",
-                    createdAt: "2025-10-17T02:51:47.226Z",
-                }
-            });
-
-            const response = createResponse();
-
-            await updateShipment(request, response);
-
-            expect(response.statusCode).toBe(404);
-            expect(response._getJSONData()).toEqual({
-                ok: false,
-                message: "envio con ID NOT_FOUND no encontrado."
-            });
-        });
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        ok: false,
+        message: 'orderId y carrier son requeridos',
+      });
     });
 
-    describe('deleteShipment', () => {
-        test('should delete an shipment successfully', async () => {
-            const mockShipmentId = "68f1af4359f42963b0ed4b5b";
-            const request = createRequest({ params: { id: mockShipmentId } });
-            const response = createResponse();
+    it('responde 201 y retorna el shipment cuando assignShipment tiene éxito', async () => {
+      const payload = { orderId: 'ord-1', carrier: 'DHL' };
+      const created = { ...payload, trackingNumber: 'DHL-ABC' };
+      mockedService.assignShipment.mockResolvedValueOnce(created as any);
 
-            await deleteShipment(request, response);
+      const req = mockRequest(payload, {});
+      const res = mockResponse();
 
-            expect(response.statusCode).toBe(200);
-            expect(response._getJSONData()).toEqual({
-                ok: true,
-                data: {
-                    _id: mockShipmentId,
-                    active: false,
-                    updatedAt: "2025-10-17T03:10:00.000Z"
-                }
-            });
-        });
+      await shipmentController.assignShipmentController(req, res);
 
-        test('should return 404 if shipment not found', async () => {
-            const request = createRequest({ params: { id: "NOT_FOUND" } });
-            const response = createResponse();
-
-            await deleteShipment(request, response);
-
-            expect(response.statusCode).toBe(404);
-            expect(response._getJSONData()).toEqual(
-                expect.objectContaining({
-                    ok: false,
-                    message: "Error al eliminar el envio",
-                    error: "envio no encontrado"
-                })
-            );
-        });
+      expect(mockedService.assignShipment).toHaveBeenCalledWith(payload.orderId, payload.carrier);
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith({
+        ok: true,
+        message: 'Transportadora y número de guía asignados correctamente',
+        data: created,
+      });
     });
 
-    describe('getAllShipment', () => {
-        test('should return all products successfully', async () => {
-            const request = createRequest();
-            const response = createResponse();
+    it('responde 500 y muestra el mensaje del error cuando assignShipment falla', async () => {
+      mockedService.assignShipment.mockRejectedValueOnce(new Error('service fail'));
 
-            await getAllShipment(request, response);
+      const req = mockRequest({ orderId: 'o1', carrier: 'UPS' }, {});
+      const res = mockResponse();
 
-            expect(response.statusCode).toBe(200);
-            expect(response._getJSONData()).toEqual({
-                ok: true,
-                data: expect.arrayContaining([
-                    expect.objectContaining({
-                        orderId: "test",
-                        trackingNumber: "test",
-                        carrier: "test",
-                        statusId: "test",
-                        shipmentAt: "test",
-                        deliveryAt: "test"
-                    }),
-                    expect.objectContaining({
-                        orderId: "test",
-                        trackingNumber: "test",
-                        carrier: "test",
-                        statusId: "test",
-                        shipmentAt: "test",
-                        deliveryAt: "test"
-                    })
-                ])
-            });
-        });
+      await shipmentController.assignShipmentController(req, res);
 
-        test('should throw error if getShipment fails', async () => {
-            const { getShipment } = require('../../domain/services/shipment-service');
-            getShipment.mockImplementationOnce(() => {
-                throw new Error("Database error");
-            });
-
-            const request = createRequest();
-            const response = createResponse();
-
-            await expect(getAllShipment(request, response)).rejects.toThrow("No se pudo obtener el envio");
-        });
+      expect(mockedService.assignShipment).toHaveBeenCalledWith('o1', 'UPS');
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        ok: false,
+        message: 'service fail',
+      });
     });
+  });
+
+  describe('deleteShipment', () => {
+    it('responde 400 si no viene id en params', async () => {
+      const req = mockRequest({}, {});
+      const res = mockResponse();
+
+      await shipmentController.deleteShipment(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        ok: false,
+        message: 'El id no es valido',
+      });
+    });
+
+    it('responde ok con data cuando deleteLShipment tiene éxito', async () => {
+      const deleteResult = { message: 'Envio eliminado correctamente' };
+      mockedService.deleteLShipment.mockResolvedValueOnce(deleteResult as any);
+
+      const req = mockRequest({}, { id: 'sh-1' });
+      const res = mockResponse();
+
+      await shipmentController.deleteShipment(req, res);
+
+      expect(mockedService.deleteLShipment).toHaveBeenCalledWith('sh-1');
+      expect(res.json).toHaveBeenCalledWith({
+        ok: true,
+        data: deleteResult,
+      });
+    });
+
+    it('responde 404 con mensaje cuando deleteLShipment lanza error', async () => {
+      mockedService.deleteLShipment.mockRejectedValueOnce(new Error('delete fail'));
+
+      const req = mockRequest({}, { id: 'sh-404' });
+      const res = mockResponse();
+
+      await shipmentController.deleteShipment(req, res);
+
+      expect(mockedService.deleteLShipment).toHaveBeenCalledWith('sh-404');
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        ok: false,
+        message: 'Error al eliminar el envio',
+        error: 'delete fail',
+      });
+    });
+  });
 });

@@ -1,4 +1,5 @@
 export interface IProductCategory {
-    name: string
+    name: string,
+    active: boolean
 }
 

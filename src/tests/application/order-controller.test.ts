@@ -1,221 +1,249 @@
-import { createRequest, createResponse } from 'node-mocks-http';
-import { createOrder, updateOrder, inactiveOrder, getAllOrder } from '../../application/controllers/order-controller';
+import { Request, Response } from "express";
+import {
+    getAllOrder,
+    getOrderStatusController,
+    placeOrder,
+    changeOrderStatusController,
+    inactiveOrder,
+} from "../../application/controllers/order-controller";
 
-jest.mock('../../domain/services/order-service', () => ({
-    saveOrder: jest.fn(() => ({
-        _id: "68f1af4359f42963b0ed4b5b",
-        userId: "test",
-        totalAmount: "test",
-        orderStatusId: "test",
-        shippingAddressId: "test",
-        createdAt: "2025-10-17T02:51:47.226Z",
-        active: true,
-        __v: 0
-    })),
+import * as orderService from "../../domain/services/order-service";
+import { AuthRequest } from "../../infraestructure/auth/jwt-service";
 
-    updateLOrder: jest.fn((id, data) => {
-        if (id === "NOT_FOUND") return null;
-        return {
-            _id: id,
-            ...data,
-            createdAt: "2025-10-17T02:51:47.226Z",
-            __v: 0
-        };
-    }),
-
-    inactiveLOrder: jest.fn((id) => {
-        if (id === "NOT_FOUND") throw new Error("Orden no encontrada");
-        return {
-            _id: id,
-            active: false,
-            updatedAt: "2025-10-17T03:10:00.000Z"
-        };
-    }),
-
-    getOrder: jest.fn(() => ([
-        {
-            _id: "68f1af4359f42963b0ed4b5b",
-            userId: "68f19abdbfbc4b108d49e961",
-            totalAmount: "500000",
-            orderStatusId: "ORD-ST-002",
-            shippingAddressId: "66f1ab3d9f42963b0ed4a3f",
-            createdAt: "2025-10-17T02:51:47.226Z",
-            active: true,
-            __v: 0
-        },
-        {
-            _id: "68f1af4359f42963b0ed4b5c",
-            userId: "68f19abdbfbc4b108d49e962",
-            totalAmount: "250000",
-            orderStatusId: "ORD-ST-001",
-            shippingAddressId: "66f1ab3d9f42963b0ed4a40",
-            createdAt: "2025-10-17T02:51:47.226Z",
-            active: false,
-            __v: 0
-        }
-    ]))
+jest.mock("../../domain/services/order-service", () => ({
+    getOrder: jest.fn(),
+    getOrderStatus: jest.fn(),
+    createOrderFromCheckout: jest.fn(),
+    updateOrderStatus: jest.fn(),
+    inactiveLOrder: jest.fn(),
 }));
 
-describe('order-controller tests', () => {
-    describe('createOrder', () => {
-        test('should create a new order', async () => {
-            const mockOrder = {
-                userId: "test",
-                totalAmount: "test",
-                orderStatusId: "test",
-                shippingAddressId: "test"
-            };
+const mockedService = orderService as jest.Mocked<typeof orderService>;
 
-            const request = createRequest({ body: mockOrder });
-            const response = createResponse();
+const mockResponse = () => {
+    const res = {} as Response;
+    res.status = jest.fn().mockReturnValue(res);
+    res.json = jest.fn().mockReturnValue(res);
+    return res;
+};
 
-            await createOrder(request, response);
+const mockRequest = (data: Partial<AuthRequest> = {}): AuthRequest =>
+    (data as AuthRequest);
 
-            expect(response.statusCode).toBe(200);
-            expect(response._getJSONData()).toEqual({
+describe("order-controller", () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    describe("getAllOrder", () => {
+        it("retorna lista de órdenes exitosamente", async () => {
+            const req = mockRequest();
+            const res = mockResponse();
+            const fakeOrders = [{ id: "1" }, { id: "2" }] as any;
+
+            mockedService.getOrder.mockResolvedValueOnce(fakeOrders);
+
+            await getAllOrder(req as any, res);
+
+            expect(mockedService.getOrder).toHaveBeenCalled();
+            expect(res.json).toHaveBeenCalledWith({
                 ok: true,
-                staus: 'created',
-                data: {
-                    _id: "68f1af4359f42963b0ed4b5b",
-                    userId: "test",
-                    totalAmount: "test",
-                    orderStatusId: "test",
-                    shippingAddressId: "test",
-                    createdAt: "2025-10-17T02:51:47.226Z",
-                    active: true,
-                    __v: 0
-                }
+                data: fakeOrders,
             });
+        });
+
+        it("lanza error si getOrder falla", async () => {
+            const req = mockRequest();
+            const res = mockResponse();
+
+            mockedService.getOrder.mockRejectedValueOnce(new Error("DB fail"));
+
+            await expect(getAllOrder(req as any, res)).rejects.toThrow(
+                "No se pudo obtener la orden"
+            );
         });
     });
 
-    describe('updateOrder', () => {
-        test('should update an existing order', async () => {
-            const mockOrderId = "68f1af4359f42963b0ed4b5b";
-            const mockOrderUpdate = {
-                userId: "68f19abdbfbc4b108d49e961",
-                totalAmount: "750000",
-                orderStatusId: "ORD-ST-003",
-                shippingAddressId: "66f1ab3d9f42963b0ed4a3f",
-                active: true
-            };
-
-            const request = createRequest({
-                params: { id: mockOrderId },
-                body: mockOrderUpdate
+    describe("getOrderStatusController", () => {
+        it("devuelve 200 con estado de orden", async () => {
+            const req = mockRequest({
+                user: { id: "user1", email: "test@test.com", role: "USER" },
+                params: { orderId: "o1" },
             });
+            const res = mockResponse();
 
-            const response = createResponse();
+            const fakeStatus = {
+                orderId: "507f191e810c19729de860ea",
+                orderNumber: "ORD12345",
+                status: "EN_TRANSITO",
+            } as any;
 
-            await updateOrder(request, response);
+            mockedService.getOrderStatus.mockResolvedValueOnce(fakeStatus);
 
-            expect(response.statusCode).toBe(200);
-            expect(response._getJSONData()).toEqual({
+            await getOrderStatusController(req as any, res);
+
+            expect(mockedService.getOrderStatus).toHaveBeenCalledWith("user1", "o1");
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith({
                 ok: true,
-                data: {
-                    _id: mockOrderId,
-                    ...mockOrderUpdate,
-                    createdAt: "2025-10-17T02:51:47.226Z",
-                    __v: 0
-                }
+                data: fakeStatus,
             });
         });
 
-        test('should return 404 if order not found', async () => {
-            const request = createRequest({
-                params: { id: "NOT_FOUND" },
-                body: {
-                    userId: "68f19abdbfbc4b108d49e961",
-                    totalAmount: "750000",
-                    orderStatusId: "ORD-ST-003",
-                    shippingAddressId: "66f1ab3d9f42963b0ed4a3f",
-                    active: true
-                }
+        it("maneja error con status 400", async () => {
+            const req = mockRequest({
+                user: { id: "user1", email: "t@t.com", role: "USER" },
+                params: { orderId: "o1" },
             });
+            const res = mockResponse();
 
-            const response = createResponse();
+            mockedService.getOrderStatus.mockRejectedValueOnce(new Error("Order not found"));
 
-            await updateOrder(request, response);
+            await getOrderStatusController(req as any, res);
 
-            expect(response.statusCode).toBe(404);
-            expect(response._getJSONData()).toEqual({
-                ok: false,
-                message: "orden con ID NOT_FOUND no encontrado."
-            });
-        });
-    });
-
-    describe('inactiveOrder', () => {
-        test('should deactivate an order successfully', async () => {
-            const mockOrderId = "68f1af4359f42963b0ed4b5b";
-            const request = createRequest({ params: { id: mockOrderId } });
-            const response = createResponse();
-
-            await inactiveOrder(request, response);
-
-            expect(response.statusCode).toBe(200);
-            expect(response._getJSONData()).toEqual({
-                ok: true,
-                data: {
-                    _id: mockOrderId,
-                    active: false,
-                    updatedAt: "2025-10-17T03:10:00.000Z"
-                }
-            });
-        });
-
-        test('should return 404 if order not found', async () => {
-            const request = createRequest({ params: { id: "NOT_FOUND" } });
-            const response = createResponse();
-
-            await inactiveOrder(request, response);
-
-            expect(response.statusCode).toBe(404);
-            expect(response._getJSONData()).toEqual(
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith(
                 expect.objectContaining({
                     ok: false,
-                    message: "Error al desactivar la orden",
-                    error: "Orden no encontrada"
+                    message: "Order not found",
                 })
             );
         });
     });
 
-    describe('getAllOrder', () => {
-        test('should return all orders successfully', async () => {
-            const request = createRequest();
-            const response = createResponse();
+    describe("placeOrder", () => {
+        it("crea una orden exitosamente", async () => {
+            const req = mockRequest({
+                user: { id: "u1", email: "test@test.com", role: "USER" },
+                body: { addressId: "addr123" },
+            });
+            const res = mockResponse();
+            const fakeOrder = { id: "order123" } as any;
 
-            await getAllOrder(request, response);
+            mockedService.createOrderFromCheckout.mockResolvedValueOnce(fakeOrder);
 
-            expect(response.statusCode).toBe(200);
-            expect(response._getJSONData()).toEqual({
+            await placeOrder(req as any, res);
+
+            expect(mockedService.createOrderFromCheckout).toHaveBeenCalledWith("u1", "addr123");
+            expect(res.json).toHaveBeenCalledWith({
                 ok: true,
-                data: expect.arrayContaining([
-                    expect.objectContaining({
-                        _id: "68f1af4359f42963b0ed4b5b",
-                        userId: "68f19abdbfbc4b108d49e961",
-                        totalAmount: "500000"
-                    }),
-                    expect.objectContaining({
-                        _id: "68f1af4359f42963b0ed4b5c",
-                        userId: "68f19abdbfbc4b108d49e962",
-                        totalAmount: "250000"
-                    })
-                ])
+                message: "Orden creada exitosamente",
+                data: fakeOrder,
             });
         });
 
-        test('should throw error if getOrder fails', async () => {
-            const { getOrder } = require('../../domain/services/order-service');
-            getOrder.mockImplementationOnce(() => {
-                throw new Error("Database error");
+        it("retorna error 400 si el servicio lanza excepción", async () => {
+            const req = mockRequest({
+                user: { id: "u1", email: "t@t.com", role: "USER" },
+                body: { addressId: "addr" },
             });
+            const res = mockResponse();
 
-            const request = createRequest();
-            const response = createResponse();
+            mockedService.createOrderFromCheckout.mockRejectedValueOnce(
+                new Error("Error al crear la orden")
+            );
 
-            await expect(getAllOrder(request, response)).rejects.toThrow("No se pudo obtener la orden");
+            await placeOrder(req as any, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    ok: false,
+                    message: "Error al crear la orden",
+                })
+            );
+        });
+    });
+
+    describe("changeOrderStatusController", () => {
+        it("retorna 400 si no se envía newStatus", async () => {
+            const req = mockRequest({ params: { orderId: "o1" }, body: {} });
+            const res = mockResponse();
+
+            await changeOrderStatusController(req as any, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({
+                ok: false,
+                message: "newStatus es requerido en el body",
+            });
+        });
+
+        it("actualiza el estado de la orden correctamente", async () => {
+            const req = mockRequest({
+                params: { orderId: "o1" },
+                body: { newStatus: "ENTREGADO" },
+            });
+            const res = mockResponse();
+            const updatedOrder = { id: "o1", status: "ENTREGADO" } as any;
+
+            mockedService.updateOrderStatus.mockResolvedValueOnce(updatedOrder);
+
+            await changeOrderStatusController(req as any, res);
+
+            expect(mockedService.updateOrderStatus).toHaveBeenCalledWith("o1", "ENTREGADO");
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith({
+                ok: true,
+                message: "Estado actualizado a ENTREGADO",
+                data: updatedOrder,
+            });
+        });
+
+        it("maneja error en updateOrderStatus", async () => {
+            const req = mockRequest({
+                params: { orderId: "o1" },
+                body: { newStatus: "CANCELADO" },
+            });
+            const res = mockResponse();
+
+            mockedService.updateOrderStatus.mockRejectedValueOnce(new Error("No se pudo actualizar"));
+
+            await changeOrderStatusController(req as any, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    ok: false,
+                    message: "No se pudo actualizar",
+                })
+            );
+        });
+    });
+
+    describe("inactiveOrder", () => {
+        it("desactiva una orden exitosamente", async () => {
+            const req = mockRequest({ params: { id: "o123" } });
+            const res = mockResponse();
+            const fakeOrder = { id: "o123", active: false } as any;
+
+            mockedService.inactiveLOrder.mockResolvedValueOnce(fakeOrder);
+
+            await inactiveOrder(req as any, res);
+
+            expect(mockedService.inactiveLOrder).toHaveBeenCalledWith("o123");
+            expect(res.json).toHaveBeenCalledWith({
+                ok: true,
+                data: fakeOrder,
+            });
+        });
+
+        it("maneja error al desactivar la orden", async () => {
+            const req = mockRequest({ params: { id: "o123" } });
+            const res = mockResponse();
+
+            mockedService.inactiveLOrder.mockRejectedValueOnce(new Error("Not found"));
+
+            await inactiveOrder(req as any, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    ok: false,
+                    message: "Error al desactivar la orden",
+                    error: "Not found",
+                })
+            );
         });
     });
 });

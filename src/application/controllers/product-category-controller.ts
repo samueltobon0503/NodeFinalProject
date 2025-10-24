@@ -23,7 +23,8 @@ export const createProductCategory = async (request: Request, response: Response
         const { name } = request.body;
 
         const newProduct: IProductCategory = {
-            name: name
+            name: name,
+            active: true
         }
         const result = await saveProductCategory(newProduct);
         response.json({
@@ -39,8 +40,6 @@ export const createProductCategory = async (request: Request, response: Response
             error: error.message || error
         });
     }
-
-
 };
 
 export const inactiveCategory = async (request: Request, response: Response) => {

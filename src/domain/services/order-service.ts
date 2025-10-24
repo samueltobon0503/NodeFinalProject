@@ -17,17 +17,6 @@ export const getOrder = async () => {
     }
 }
 
-export const saveOrder = async (order: IOrder) => {
-    try {
-        const newOrder = new Order(order);
-        await newOrder.save();
-        return newOrder;
-    } catch (error) {
-        console.error("Error al guardar la orden en MongoDB:", error);
-        throw new Error(error.message || "Fallo la creación de una orden");
-    }
-}
-
 export const createOrderFromCheckout = async (userId: string, addressId: string) => {
     const cart = await Cart.findOne({ userId });
     const user = await User.findById(userId);
@@ -82,12 +71,13 @@ export const createOrderFromCheckout = async (userId: string, addressId: string)
     return newOrder;
 };
 
-function generateOrderNumber(): string {
+export const generateOrderNumber = (): string => {
     const date = new Date();
     const dateStr = date.toISOString().split("T")[0].replace(/-/g, "");
-    const randomStr = crypto.randomBytes(3).toString("hex").toUpperCase();
+    // Note: Assuming 'crypto' is imported or available globally
+    const randomStr = crypto.randomBytes(3).toString("hex").toUpperCase(); 
     return `ORD-${dateStr}-${randomStr}`;
-}
+};
 
 export const getOrderStatus = async (userId: string, orderId: string) => {
 
