@@ -1,6 +1,6 @@
 # Aliestres API
 
-![Aliestres Logo](./docs/aliestres.jpg)
+![Aliestres Logo](./docs/aliestres_logo.jpg)
 
 ---
 
