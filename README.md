@@ -4,25 +4,25 @@
 
 ---
 
-## Descripción General
+## Overview
 
-**Aliestres API** es una plataforma de comercio electrónico desarrollada bajo una **arquitectura hexagonal**, orientada a mantener un código modular, escalable y fácil de mantener.  
-Provee funcionalidades completas de gestión de usuarios, productos, carritos, pedidos, direcciones, autenticación y más.
+**Aliestres API** is an e-commerce platform developed under a Hexagonal Architecture, designed to maintain a modular, scalable, and easily maintainable codebase.
+It provides complete functionality for managing users, products, carts, orders, addresses, authentication, and more.
 
-El sistema incluye:
-- Control de roles y autenticación con **JWT**
-- Validación de correos electrónicos
-- Envío de notificaciones automáticas por correo
-- Tareas programadas (**cron jobs**) para mantenimiento del sistema
-- Pruebas unitarias con **Jest**
-- Encriptación de contraseñas con **bcryptjs**
-- Uso de **MongoDB Atlas** como base de datos en la nube
+The system includes:
 
+- Role-based control and authentication with JWT
+- Email verification
+- Automatic email notifications
+- Scheduled tasks (cron jobs) for system maintenance
+- Unit testing with Jest
+- Password encryption using bcryptjs
+- MongoDB Atlas as a cloud database
 ---
 
-## Integrantes del Proyecto
+## Project Members
 
-| Nombre             | Rol / Aporte Principal |
+| Nombre             | Role / Main Contribution |
 |--------------------|------------------------|
 | **Samuel Tobon**   | Backend, autenticación y servicios |
 | **Nicolás Restrepo** | Modelado de base de datos y controladores |
@@ -30,48 +30,45 @@ El sistema incluye:
 
 ---
 
-## Arquitectura del Proyecto
+## Project Architecture
 
-El proyecto sigue el patrón **Hexagonal (Ports & Adapters)**, dividiendo las responsabilidades en capas:
+The project follows the Hexagonal Architecture (Ports & Adapters) pattern, dividing responsibilities into layers:
 
-- **Domain**: Lógica de negocio, modelos, servicios y reglas de dominio.
-- **Application**: Controladores y validaciones.
-- **Infrastructure**: Integraciones externas (JWT, nodemailer, base de datos, etc).
-- **Tests**: Cobertura unitaria de controladores y servicios.
+- **Domain**: Business logic, models, services, and domain rules.
+- **Application**: Controllers and validations.
+- **Infrastructure**: External integrations (JWT, nodemailer, database, etc.).
+- **Tests**: Unit coverage for controllers and services.
 
 ---
 
-## Tecnologías y Librerías
+## Technologies and Libraries
 
 - **Node.js** + **Express**
 - **TypeScript**
 - **MongoDB Atlas**
-- **bcryptjs** → Encriptación de contraseñas
-- **jsonwebtoken** → Manejo de autenticación JWT
-- **nodemailer** → Envío de correos
-- **node-cron** → Tareas automáticas
-- **rxjs** → Flujo reactivo en servicios
-- **jest** → Pruebas unitarias
+- **bcryptjs** 
+- **jsonwebtoken** 
+- **nodemailer** 
+- **node-cron** 
+- **rxjs** 
+- **jest** 
 
 ---
 
-## Instalación y Ejecución
+## Installation and Execution
 
 ```bash
-# Clonar el repositorio
+# Clone the repository
 git clone https://github.com/<usuario>/alietres-api.git
 cd alietres-api
 
-# Instalar dependencias
+# Install dependencies
 npm install
 
-# Crear el archivo de entorno
-cp .env.example .env
+# Run 
+npm start
 
-# Ejecutar en modo desarrollo
-npm run start:dev
-
-# Correr pruebas
+#Run tests
 npm test
 
 |  Method | Route   | Description / Protection                            |
