@@ -8,8 +8,6 @@ shipmentRouter.get('/shipment', verifyAuthToken, getAllShipment);
 
 shipmentRouter.post('/shipment', verifyAuthToken, assignShipmentController);
 
-// shipmentRouter.put('/shipment/:id', verifyAuthToken, updateShipment);
-
 shipmentRouter.delete('/shipment/delete/:id', verifyAuthToken, deleteShipment);
 
 export default shipmentRouter;

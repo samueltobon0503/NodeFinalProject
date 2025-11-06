@@ -1,14 +1,10 @@
-// src/tests/services/user.service.test.ts
-import * as userService from '../../domain/services/user-service'; // ajusta según la ruta real de tu service
-import { User } from '../../domain/interfaces/User'; // IMPORTANTE: usa exactamente la misma ruta que tu service usa
+import * as userService from '../../domain/services/user-service';
+import { User } from '../../domain/interfaces/User';
 
-// Mock del módulo que exporta User (constructor + métodos estáticos)
 jest.mock('../../domain/interfaces/User', () => {
   const find = jest.fn();
   const findOne = jest.fn();
   const findByIdAndUpdate = jest.fn();
-
-  // Constructor mock (instancia con save)
   const UserMock = jest.fn().mockImplementation((data) => ({
     ...data,
     save: jest.fn().mockResolvedValue(data),
@@ -25,7 +21,6 @@ jest.mock('../../domain/interfaces/User', () => {
 });
 
 describe('user.service', () => {
-  // Tipado cómodo para acceder a los mocks
   const UserMock = User as unknown as jest.Mock & {
     find: jest.Mock;
     findOne: jest.Mock;
@@ -100,7 +95,6 @@ describe('user.service', () => {
     it('crea y devuelve el usuario cuando save tiene éxito', async () => {
       const payload = { name: 'User', email: 'u@test', active: true };
 
-      // Hacemos que la instancia devuelta por el constructor tenga un save que resuelve
       (UserMock as jest.Mock).mockImplementationOnce(() => ({
         ...payload,
         save: jest.fn().mockResolvedValue(payload),

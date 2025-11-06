@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config()
 import express, { Application } from "express";
+import cors from "cors";
 import appRouter from "./application/routes/app-routes";
 import { dbConnection } from "./infraestructure/config/mongoDB";
 import cron from "node-cron";
@@ -11,6 +12,7 @@ dbConnection();
 const PORT:number = 4000;
 const app : Application = express();
 
+
 cron.schedule("0 * * * *", async () => {
   console.log("Ejecutando cron de cancelacion de ordenes no procesadas.....");
   await autoCancelPendingOrders();
@@ -20,6 +22,8 @@ cron.schedule("0 0 * * *", async () => {
   console.log("Ejecutando tarea automática de revisión de envíos antiguos...");
   await markLostShipments();
 });
+
+app.use(cors());
 
 app.use (express.json());
 

@@ -61,7 +61,7 @@ export const saveProduct = async (product: IProduct) => {
             throw new Error("La imagen debe tener formato JPG o PNG.");
         }
 
-        product.price = formattedPrice;
+        product.price = price;
         const newProduct = new Product(product);
         await newProduct.save();
         return newProduct;

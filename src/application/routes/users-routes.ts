@@ -6,8 +6,10 @@ const userRouter: Router = express.Router();
 
 userRouter.get('/user', verifyAuthToken, getAllUsers);
 
-userRouter.post('/user', createUser);
+userRouter.post('/user/', createUser);
 
 userRouter.put('/user/inactive/:id', verifyAuthToken, inactiveUser);
 
 export default userRouter;
+
+//register
