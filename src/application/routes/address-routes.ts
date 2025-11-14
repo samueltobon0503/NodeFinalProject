@@ -1,8 +1,10 @@
 import express, { Router } from "express";
 import { verifyAuthToken } from "../middlewares/jwt-verification";
-import { createAddress } from "../controllers/address-controller";
+import { createAddress, getAddress } from "../controllers/address-controller";
 
 const addressRouter: Router = express.Router();
+
+addressRouter.get('/address', verifyAuthToken, getAddress);
 
 addressRouter.post('/address', verifyAuthToken, createAddress);
 

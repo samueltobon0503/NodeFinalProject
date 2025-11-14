@@ -3,6 +3,7 @@ export interface ICartItem {
   name: string;
   quantity: number;
   unitPrice: number;
+  imageUrl: string;
   subtotal: number;
   priceLockedUntil: Date;
 }

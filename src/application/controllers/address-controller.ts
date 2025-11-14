@@ -1,6 +1,22 @@
 import { Request, Response } from "express";
-import { saveAddress } from "../../domain/services/address-service";
+import { getAddressByUserId, saveAddress } from "../../domain/services/address-service";
 import { IAddress } from "../../domain/models/IAddress";
+import { AuthRequest } from "../../infraestructure/auth/jwt-service";
+
+export const getAddress = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user.id;
+    const address = await getAddressByUserId(userId);
+    if (!address) {
+      return res.status(200).json({ ok: true, message: "Aun no has creado tu dirección", data: [] });
+    }
+
+    res.json({ ok: true, data: address });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, message: "Error obteniendo el carrito" });
+  }
+};
 
 
 export const createAddress = async (request: Request, response: Response) => {

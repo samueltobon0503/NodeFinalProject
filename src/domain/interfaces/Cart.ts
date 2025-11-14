@@ -6,6 +6,7 @@ const cartItemSchema = new Schema<ICartItem>({
   name: { type: String, required: true },
   quantity: { type: Number, required: true, min: 1 },
   unitPrice: { type: Number, required: true },
+  imageUrl: { type: String, required: true},
   subtotal: { type: Number, required: true },
   priceLockedUntil: { type: Date, required: true },
 });

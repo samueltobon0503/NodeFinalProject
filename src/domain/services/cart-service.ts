@@ -53,7 +53,8 @@ export const addToCart = async (userId: string, productId: string, quantity: num
             quantity,
             unitPrice: parseFloat(price.toFixed(2)),
             subtotal: parseFloat((price * quantity).toFixed(2)),
-            priceLockedUntil: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 horas
+            priceLockedUntil: new Date(Date.now() + 2 * 60 * 60 * 1000),
+            imageUrl: product.imageUrl
         });
 
     }

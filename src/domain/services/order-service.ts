@@ -1,3 +1,4 @@
+import { notifyUser } from "../../app";
 import { sendEmail } from "../../infraestructure/emails/email.service";
 import { OrderStatus } from "../config/dictionary.enum";
 import { Address } from "../interfaces/Adress";
@@ -95,10 +96,20 @@ export const getOrderStatus = async (userId: string, orderId: string) => {
   }
 
   return {
-    orderId: order._id,
-    orderNumber: order.orderNumber,
-    status: order.orderStatusId,
+   order
   };
+};
+
+export const getOrdersByUser = async (userId: string) => {
+  const orders = await Order.find({ userId }).lean();
+
+  if (!orders || orders.length === 0) {
+    const err: any = new Error("No se encontraron órdenes para este usuario");
+    err.status = 404;
+    throw err;
+  }
+
+  return { orders };
 };
 
 export const updateOrderStatus = async (orderId: string, newStatusRaw: string) => {
@@ -147,6 +158,12 @@ export const updateOrderStatus = async (orderId: string, newStatusRaw: string) =
   }
 
   await order.save();
+
+    notifyUser(order.userId.toString(), {
+      orderId: order.orderNumber,
+      newStatus: order.orderStatusId,
+      message: `Tu orden ${order.orderNumber} ahora está en estado "${order.orderStatusId}".`
+    });
 
   try {
     const user = await User.findById(order.userId);

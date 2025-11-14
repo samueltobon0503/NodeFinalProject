@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { IOrder } from "../../domain/models/IOrder";
-import { createOrderFromCheckout, getOrder, getOrderStatus, inactiveLOrder, updateOrderStatus } from "../../domain/services/order-service";
+import { createOrderFromCheckout, getOrder, getOrdersByUser, getOrderStatus, inactiveLOrder, updateOrderStatus } from "../../domain/services/order-service";
 import { AuthRequest } from "../../infraestructure/auth/jwt-service";
 
 export const getAllOrder = async (request: Request, response: Response) => {
@@ -29,6 +29,21 @@ export const getOrderStatusController = async (req: AuthRequest, res: Response) 
     return res.status(status).json({ ok: false, message: error.message || "Error obteniendo estado" });
   }
 };
+
+export const getOrdersByUserId = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const result = await getOrdersByUser(userId);
+
+    return res.status(200).json({ ok: true, data: result });
+    
+  } catch (error: any) {
+    console.error(error);
+    const status = error.status || 400;
+    return res.status(status).json({ ok: false, message: error.message || "Error obteniendo estado" });
+  }
+};
+
 
 export const placeOrder = async (req: AuthRequest, res: Response) => {
   try {

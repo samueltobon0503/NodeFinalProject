@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import { IUser } from "../../domain/models/IUser";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { getUserByEmail, getUsers, inactiveLUser, saveUser, updateLUser, verifyUserEmail } from "../../domain/services/user-service";
+import { getUserByEmail, getUserById, getUsers, inactiveLUser, saveUser, updateLUser, verifyUserEmail } from "../../domain/services/user-service";
 import { sendEmail } from "../../infraestructure/emails/email.service";
+import { AuthRequest } from "../../infraestructure/auth/jwt-service";
 
 export const getAllUsers = async (request: Request, response: Response) => {
 
@@ -18,6 +19,22 @@ export const getAllUsers = async (request: Request, response: Response) => {
         throw new Error("No se pudo obtener el usuario");
     }
 };
+
+export const getUserByIdC = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const user = await getUserById(userId);
+    res.json({
+      ok: true,
+      message: "Exito",
+      data: user,
+    });
+  } catch (error: any) {
+    console.error(error);
+    res.status(400).json({ ok: false, message: error.message || "Error al crear la orden" });
+  }
+};
+
 
 export const createUser = async (request: Request, response: Response) => {
     try {
