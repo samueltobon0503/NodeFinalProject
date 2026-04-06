@@ -11,6 +11,7 @@ export const getAddress = async (req: AuthRequest, res: Response) => {
       return res.status(200).json({ ok: true, message: "Aun no has creado tu dirección", data: [] });
     }
 
+    //Prueba
     res.json({ ok: true, data: address });
   } catch (error) {
     console.error(error);
