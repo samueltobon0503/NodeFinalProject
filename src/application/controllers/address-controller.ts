@@ -18,7 +18,7 @@ export const getAddress = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ ok: false, message: "Error obteniendo el carrito" });
   }
 };
-
+//DOCKERIZAMOOOOOOOOOOOO 
 
 export const createAddress = async (request: Request, response: Response) => {
     try {

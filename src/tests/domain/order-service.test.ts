@@ -191,7 +191,6 @@ describe('getOrderStatus Service', () => {
         OrderFindStaticMock.mockImplementation(jest.fn());
     });
 
-
     test('debería lanzar un error 404 si la orden no se encuentra', async () => {
         OrderFindByIdLeanMock.mockResolvedValue(null);
 
