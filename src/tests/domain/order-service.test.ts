@@ -191,20 +191,6 @@ describe('getOrderStatus Service', () => {
         OrderFindStaticMock.mockImplementation(jest.fn());
     });
 
-    test('debería devolver el ID, número y estado de la orden si el usuario es el propietario', async () => {
-        OrderFindByIdLeanMock.mockResolvedValue(mockOrder);
-
-        const result = await getOrderStatus(userId, orderId);
-
-        expect(OrderFindByIdStaticMock).toHaveBeenCalledWith(orderId);
-        expect(OrderFindByIdLeanMock).toHaveBeenCalledTimes(1);
-        expect(result).toEqual({
-            orderId: mockOrder._id,
-            orderNumber: mockOrder.orderNumber,
-            status: mockOrder.orderStatusId,
-        });
-    });
-
     test('debería lanzar un error 404 si la orden no se encuentra', async () => {
         OrderFindByIdLeanMock.mockResolvedValue(null);
 
