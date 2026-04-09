@@ -4,6 +4,7 @@ import { IAddress } from "../../domain/models/IAddress";
 import { AuthRequest } from "../../infraestructure/auth/jwt-service";
 
 export const getAddress = async (req: AuthRequest, res: Response) => {
+    //Comentario de prueba
   try {
     const userId = req.user.id;
     const address = await getAddressByUserId(userId);
