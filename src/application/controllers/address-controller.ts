@@ -20,7 +20,7 @@ export const getAddress = async (req: AuthRequest, res: Response) => {
   }
 };
 //DOCKERIZAMOOOOOOOOOOOO 
-//Queremos dockerizar again, pofavos
+//EN TEORIA FUNCIONA DOCKER
 
 export const createAddress = async (request: Request, response: Response) => {
     try {
