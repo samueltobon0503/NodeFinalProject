@@ -1,12 +1,14 @@
 FROM node:20-alpine
-
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install --omit=dev  # Instalamos solo lo necesario para producción
+RUN npm install
 
 COPY . .
+RUN npm run build
 
-EXPOSE 80
+ENV PORT=4000
+ENV NODE_ENV=production
+EXPOSE 4000
 
-CMD ["npm", "start"]
+CMD ["node", "dist/app.js"]
